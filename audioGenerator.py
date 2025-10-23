@@ -1,0 +1,30 @@
+import soundfile as sf
+import numpy as np 
+import sys
+
+
+def generateAudioFile(samplerate, duration, frequencies):
+    toneDuration = duration/len(frequencies)
+
+    t = np.linspace(0, toneDuration, int(samplerate * toneDuration), endpoint=False)
+
+    audio_data = np.concatenate([
+        0.5 * np.sin(2 * np.pi * f * t) for f in frequencies
+    ])
+
+
+    output_filename = 'output_audio.wav'
+    sf.write(output_filename, audio_data, samplerate)
+
+    print(f"Audio data written to {output_filename}")
+
+    np.set_printoptions(threshold=sys.maxsize)
+    print(sf.read(output_filename)[0].shape)
+
+
+samplerate = 44100  # samples per second
+duration = 3  # seconds
+frequencies = [440, 1000, 220]  # Hz
+
+generateAudioFile(samplerate, duration, frequencies)
+
