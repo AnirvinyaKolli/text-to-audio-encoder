@@ -1,7 +1,0 @@
-import audioGenerator.py 
-
-text = input("enter your string")
-cArr = list(text)
-
-for c in cArr:
-    c = 110 + (c-- 32) * 10 
