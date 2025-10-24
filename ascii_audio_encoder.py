@@ -2,29 +2,68 @@ import soundfile as sf
 import numpy as np 
 from pathlib import Path 
 
-def generateAudioFile(duration, frequencies, output_filename, samplerate = 44100):
-    extra_data_path = 'extra_data.txt'
-    folder_path = Path('encoded_audio')
-    folder_path.mkdir(parents= True, exist_ok= True)
+class AudioEncoder:
+    def __init__(self, samplerate=44100, base_freq=110, freq_step=10, output_dir='encoded_audio', decode_key_path = 'key.txt'):
 
-    tone_duration = duration/len(frequencies)
+        self.START_ASCII_CODE = 32 
+        
+        self.samplerate = samplerate
+        self.base_freq = base_freq
+        self.freq_step = freq_step
+        self.output_dir = Path(output_dir)        
+        self.output_dir.mkdir(parents=True, exist_ok=True)
+        self.decode_key_path = decode_key_path
+    
+    def generateAudioFile(self, duration, text, output_filename,):
+        
+        frequencies = self.generate_tones(text)
 
-    t = np.linspace(0, tone_duration, int(samplerate * tone_duration), endpoint=False)
+        tone_duration = duration/len(frequencies)
 
-    audio_data = np.concatenate([
-        0.5 * np.sin(2 * np.pi * f * t) for f in frequencies
-    ])
+        t = np.linspace(0, tone_duration, int(self.samplerate * tone_duration), endpoint=False)
+        audio_data = np.concatenate([
+            0.5 * np.sin(2 * np.pi * f * t) for f in frequencies
+        ])
 
+        sf.write(self.output_dir / (output_filename + '.wav'), audio_data, self.samplerate)
 
-    sf.write(folder_path / output_filename, audio_data, samplerate)
+        with open(self.output_dir / (output_filename + '_' + self.decode_key_path), 'w') as f:
+            f.write('Tone Duration: ' + str(tone_duration) + '\n')
+            f.write('Base Frequency: ' + str(self.base_freq) + '\n')
+            f.write('Frequency Step: ' + str(self.freq_step) + '\n')
 
-    with open(folder_path/extra_data_path, 'w') as f:
-        f.write('Tone Duration: ' + str(tone_duration) + '\n')
-        f.close()
+            f.close()
 
+        return 'Files generated in ' + str(self.output_dir)  
 
+    def generate_tones(self, text):
+            return [ self.base_freq + (ord(c) - self.START_ASCII_CODE) * self.freq_step for c in text]
 
-def generate_tones(text):
-        return [110 + (ord(c) - 32) * 10 for c in text]
+    #Decoding 
+    def decodeAudio(self, tone_duration, audio_file_path, base_freq, freq_step):
 
+        audio_data, samplerate = sf.read(audio_file_path)
+        samples_per_tone = int(samplerate * tone_duration)
+        num_tones = len(audio_data) // samples_per_tone
 
+        segments = [
+            audio_data[i * samples_per_tone : (i + 1) * samples_per_tone] for i in range(num_tones)
+        ]
+        
+        frequencies = [self.estimate_frequency(seg, samplerate) for seg in segments]
+
+        return  ''.join(
+                    [chr(int(round((f - base_freq) / freq_step + self.START_ASCII_CODE))) for f in frequencies]
+                )
+
+    def estimate_frequency(segment, samplerate):
+            
+            fft_result = np.fft.fft(segment)
+            freqs = np.fft.fftfreq(len(segment), 1 / samplerate)
+            magnitude = np.abs(fft_result)
+            positive_freqs = freqs[:len(freqs)//2]
+            positive_magnitude = magnitude[:len(magnitude)//2]
+            dominant_index = np.argmax(positive_magnitude)
+
+            return positive_freqs[dominant_index]
+        

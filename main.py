@@ -1,13 +1,17 @@
-import ascii_audio_encoder as encoder
-import ascii_audio_decoder as decoder
+import ascii_audio_encoder 
+
+encoder = ascii_audio_encoder.AudioEncoder()
 
 text = input('Enter text here: ')
-out_filepath = 'output_audio.wav'
+out_filepath = input('Enter audio file name: ')
 duration = float(input('Enter duration here: '))
 
-encoder.generateAudioFile(duration, encoder.generate_tones(text), out_filepath)
+print(encoder.generateAudioFile(duration, text, out_filepath))
 
-tone_duration = float(input("enter tone duration: "))
 
-print(decoder.decodeAudio(tone_duration, 'encoded_audio\output_audio.wav'))
+# tone_duration = float(input("enter tone duration: "))
+# base_freq = float(input("enter base frequency duration: "))
+# freq_step = float(input("enter frequency step duration: "))
+
+# out = encoder.decodeAudio(tone_duration, 'encoded_audio\output_audio.wav')
 
