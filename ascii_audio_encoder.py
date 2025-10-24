@@ -15,13 +15,11 @@ def generateAudioFile(duration, frequencies, output_filename, samplerate = 44100
         0.5 * np.sin(2 * np.pi * f * t) for f in frequencies
     ])
 
-    print("encoded: ", audio_data.shape)
 
     sf.write(folder_path / output_filename, audio_data, samplerate)
 
     with open(folder_path/extra_data_path, 'w') as f:
         f.write('Tone Duration: ' + str(tone_duration) + '\n')
-        f.write('Sample Rate: ' + str(samplerate) + '\n')
         f.close()
 
 
