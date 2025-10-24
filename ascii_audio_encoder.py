@@ -3,18 +3,16 @@ import numpy as np
 from pathlib import Path 
 
 class AudioEncoder:
-    def __init__(self, samplerate=44100, base_freq=110, freq_step=10, output_dir='encoded_audio', decode_key_path = 'key.txt'):
+    def __init__(self, samplerate=44100,  output_dir='encoded_audio', decode_key_path = 'key.txt'):
 
         self.START_ASCII_CODE = 32 
         
         self.samplerate = samplerate
-        self.base_freq = base_freq
-        self.freq_step = freq_step
         self.output_dir = Path(output_dir)        
         self.output_dir.mkdir(parents=True, exist_ok=True)
         self.decode_key_path = decode_key_path
     
-    def generateAudioFile(self, duration, text, output_filename,):
+    def generateAudioFile(self, duration, text, output_filename, base_freq=110, freq_step=10):
         
         frequencies = self.generate_tones(text)
 
@@ -29,8 +27,8 @@ class AudioEncoder:
 
         with open(self.output_dir / (output_filename + '_' + self.decode_key_path), 'w') as f:
             f.write('Tone Duration: ' + str(tone_duration) + '\n')
-            f.write('Base Frequency: ' + str(self.base_freq) + '\n')
-            f.write('Frequency Step: ' + str(self.freq_step) + '\n')
+            f.write('Base Frequency: ' + str(base_freq) + '\n')
+            f.write('Frequency Step: ' + str(freq_step) + '\n')
 
             f.close()
 
@@ -40,7 +38,7 @@ class AudioEncoder:
             return [ self.base_freq + (ord(c) - self.START_ASCII_CODE) * self.freq_step for c in text]
 
     #Decoding 
-    def decodeAudio(self, tone_duration, audio_file_path, base_freq, freq_step):
+    def decodeAudio(self, tone_duration, base_freq, freq_step, audio_file_path):
 
         audio_data, samplerate = sf.read(audio_file_path)
         samples_per_tone = int(samplerate * tone_duration)
@@ -56,7 +54,7 @@ class AudioEncoder:
                     [chr(int(round((f - base_freq) / freq_step + self.START_ASCII_CODE))) for f in frequencies]
                 )
 
-    def estimate_frequency(segment, samplerate):
+    def estimate_frequency(self, segment, samplerate):
             
             fft_result = np.fft.fft(segment)
             freqs = np.fft.fftfreq(len(segment), 1 / samplerate)
