@@ -3,7 +3,7 @@ import numpy as np
 from pathlib import Path 
 
 class AudioEncoder:
-    def __init__(self, samplerate=44100,  output_dir='encoded_audio', decode_key_path = 'key.txt'):
+    def __init__(self, samplerate=44100,  output_dir="encoded_audio", decode_key_path = "key.txt"):
 
         self.START_ASCII_CODE = 32 
         
@@ -14,7 +14,7 @@ class AudioEncoder:
     
     def generateAudioFile(self, duration, text, output_filename, base_freq=110, freq_step=10):
         
-        frequencies = self.generate_tones(text)
+        frequencies = self.generate_tones(text, base_freq, freq_step)
 
         tone_duration = duration/len(frequencies)
 
@@ -23,19 +23,19 @@ class AudioEncoder:
             0.5 * np.sin(2 * np.pi * f * t) for f in frequencies
         ])
 
-        sf.write(self.output_dir / (output_filename + '.wav'), audio_data, self.samplerate)
+        sf.write(self.output_dir / (output_filename + ".wav"), audio_data, self.samplerate)
 
         with open(self.output_dir / (output_filename + '_' + self.decode_key_path), 'w') as f:
-            f.write('Tone Duration: ' + str(tone_duration) + '\n')
-            f.write('Base Frequency: ' + str(base_freq) + '\n')
-            f.write('Frequency Step: ' + str(freq_step) + '\n')
+            f.write("Tone Duration: " + str(tone_duration) + '\n')
+            f.write("Base Frequency: " + str(base_freq) + '\n')
+            f.write("Frequency Step: " + str(freq_step) + '\n')
 
             f.close()
 
-        return 'Files generated in ' + str(self.output_dir)  
+        return "Files generated in " + str(self.output_dir)  
 
-    def generate_tones(self, text):
-            return [ self.base_freq + (ord(c) - self.START_ASCII_CODE) * self.freq_step for c in text]
+    def generate_tones(self, text, base_freq, freq_step):
+            return [ base_freq + (ord(c) - self.START_ASCII_CODE) * freq_step for c in text]
 
     #Decoding 
     def decodeAudio(self, tone_duration, base_freq, freq_step, audio_file_path):
