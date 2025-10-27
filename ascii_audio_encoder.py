@@ -12,7 +12,7 @@ class AudioEncoder:
         self.output_dir.mkdir(parents=True, exist_ok=True)
         self.decode_key_path = decode_key_path
     
-    def generateAudioFile(self, duration, text, output_filename, base_freq=110, freq_step=10):
+    def generateAudioFile(self, duration, text, output_filename, base_freq=110, freq_step=10, computer_location = ''):
         
         frequencies = self.generate_tones(text, base_freq, freq_step)
 
@@ -23,16 +23,16 @@ class AudioEncoder:
             0.5 * np.sin(2 * np.pi * f * t) for f in frequencies
         ])
 
-        sf.write(self.output_dir / (output_filename + ".wav"), audio_data, self.samplerate)
+        sf.write(Path(computer_location) / (output_filename + ".wav"), audio_data, self.samplerate)
 
-        with open(self.output_dir / (output_filename + '_' + self.decode_key_path), 'w') as f:
+        with open(Path(computer_location) / (output_filename + '_' + self.decode_key_path), 'w') as f:
             f.write("Tone Duration: " + str(tone_duration) + '\n')
             f.write("Base Frequency: " + str(base_freq) + '\n')
             f.write("Frequency Step: " + str(freq_step) + '\n')
 
             f.close()
 
-        return "Files generated in " + str(self.output_dir)  
+        return "Files generated in " + computer_location 
 
     def generate_tones(self, text, base_freq, freq_step):
             return [ base_freq + (ord(c) - self.START_ASCII_CODE) * freq_step for c in text]

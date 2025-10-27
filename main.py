@@ -1,7 +1,8 @@
 import ascii_audio_encoder 
 import tkinter as tk 
 from tkinterdnd2 import DND_FILES, TkinterDnD
-
+from tkinter import ttk, filedialog, messagebox
+import threading
 encoder = ascii_audio_encoder.AudioEncoder()
 
 root = TkinterDnD.Tk()
@@ -34,11 +35,11 @@ encode_output_label.pack(pady=10)
 
 def encode_audio():
     entries = [
-    text_entry.get(),
-    filename_entry.get(),
-    encode_duration_entry.get(),
-    encode_base_entry.get(),
-    encode_step_entry.get()
+        text_entry.get(),
+        filename_entry.get(),
+        encode_duration_entry.get(),
+        encode_base_entry.get(),
+        encode_step_entry.get()
     ]
     if any(not e for e in entries):
         encode_output_label.config(text="Please fill in all fields before encoding.")
@@ -49,8 +50,10 @@ def encode_audio():
     duration = float(encode_duration_entry.get())
     base_freq = float(encode_base_entry.get())
     freq_step = float(encode_step_entry.get())
-    result = encoder.generateAudioFile(duration, text, out_filepath, base_freq, freq_step)
+    save_dir = filedialog.askdirectory()
+    result = encoder.generateAudioFile(duration, text, out_filepath, base_freq, freq_step, computer_location = save_dir)
     encode_output_label.config(text=result)
+
 
 tk.Button(root, text="Encode Text to Audio", command=encode_audio).pack(pady=10)
 
