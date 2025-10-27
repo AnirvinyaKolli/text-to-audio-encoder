@@ -1,111 +1,130 @@
 import ascii_audio_encoder 
 import tkinter as tk 
-from tkinterdnd2 import DND_FILES, TkinterDnD
-from tkinter import ttk, filedialog, messagebox
-import threading
+from tkinter import filedialog
+
 encoder = ascii_audio_encoder.AudioEncoder()
 
-root = TkinterDnD.Tk()
+#setup of tkinter window
+root = tk.Tk()
 root.title("Audio Encoder")
 root.geometry("800x600")
 
-#encode
+#Encoder
+
+#Get text
 tk.Label(root, text="Text to Encode:").pack(pady=5)
 text_entry = tk.Entry(root, width=40)
 text_entry.pack()
 
+#Get file name
 tk.Label(root, text="Output Audio Filename (.wav):").pack(pady=5)
 filename_entry = tk.Entry(root, width=40)
 filename_entry.pack()
 
-tk.Label(root, text="Tone Duration for Encoding (seconds):").pack(pady=5)
+#Get duration 
+tk.Label(root, text="Duration (seconds):").pack(pady=5)
 encode_duration_entry = tk.Entry(root, width=30)
 encode_duration_entry.pack()
 
-tk.Label(root, text=" Base Frequency (Hz) for Encoding :").pack(pady=5)
+#Get base frequency 
+tk.Label(root, text=" Base Frequency (Hz):").pack(pady=5)
 encode_base_entry = tk.Entry(root, width=30)
 encode_base_entry.pack()
 
-tk.Label(root, text=" Frequency Step (Hz) for Encoding :").pack(pady=5)
+#Get frequency step 
+tk.Label(root, text=" Frequency Step (Hz):").pack(pady=5)
 encode_step_entry = tk.Entry(root, width=30)
 encode_step_entry.pack()
 
+#Define output label
 encode_output_label = tk.Label(root, text="", wraplength=300)
-encode_output_label.pack(pady=10)
 
+
+#encode method
 def encode_audio():
-    entries = [
-        text_entry.get(),
-        filename_entry.get(),
-        encode_duration_entry.get(),
-        encode_base_entry.get(),
-        encode_step_entry.get()
-    ]
-    if any(not e for e in entries):
-        encode_output_label.config(text="Please fill in all fields before encoding.")
+    try: 
+        text = text_entry.get()
+        duration = float(encode_duration_entry.get())
+        base_freq = float(encode_base_entry.get())
+        freq_step = float(encode_step_entry.get())
+        output_dir = filedialog.askdirectory()
+    except: 
+        encode_output_label.config(text= "Please fill out all fields with an the proper value.")
         return
-
-    text = text_entry.get()
+    
     out_filepath = filename_entry.get()
-    duration = float(encode_duration_entry.get())
-    base_freq = float(encode_base_entry.get())
-    freq_step = float(encode_step_entry.get())
-    save_dir = filedialog.askdirectory()
-    result = encoder.generateAudioFile(duration, text, out_filepath, base_freq, freq_step, computer_location = save_dir)
-    encode_output_label.config(text=result)
+    
+    if out_filepath == '':
+        encode_output_label.config(text= "No folder chosen.")
+        return
+    
+    save_dir = encoder.generateAudioFile(
+        text=text, 
+        duration=duration, 
+        base_freq=base_freq, 
+        freq_step=freq_step,
+        output_dir=output_dir
+    )
+    
+    encode_output_label.config(text=save_dir)
 
-
+#Encode button
 tk.Button(root, text="Encode Text to Audio", command=encode_audio).pack(pady=10)
 
-#decode
-def on_drop(event):
-    global audio_path
+encode_output_label.pack(pady=10)
 
-    file_path = event.data.strip("{}")  
-    if file_path.lower().endswith((".wav")):
-        audio_path = file_path
-        entry_field.config(text=file_path)
-    else:
-        entry_field.config(text = "WRONG!")
+#Decode
 
-entry_field = tk.Label(root, text="Drag and drop the .wav file here", bg="#A7A7A7", padx=10, pady=30)
-entry_field.pack(expand=True, fill="both", padx=20, pady=20)
-
-entry_field.drop_target_register(DND_FILES)
-entry_field.dnd_bind('<<Drop>>', on_drop)
-
+#Get tone duration
 tk.Label(root, text="Tone Duration (seconds):").pack(pady=5)
 duration_entry = tk.Entry(root, width=30)
 duration_entry.pack()
 
+#Get base frequency
 tk.Label(root, text="Base Frequency (Hz):").pack(pady=5)
 base_freq_entry = tk.Entry(root, width=30)
 base_freq_entry.pack()
 
+#Get frequency step
 tk.Label(root, text="Frequency Step (Hz):").pack(pady=5)
 freq_step_entry = tk.Entry(root, width=30)
 freq_step_entry.pack()
 
-output_label = tk.Label(root, text="", wraplength=300)
-output_label.pack(pady=10)
+# Define output label
+decode_output_label = tk.Label(root, text="", wraplength=300)
 
-
-    
+# Decode function
 def decode_audio():
-    if not audio_path:
-        output_label.config(text="none provided")
+    decode_output_label.config(text= "")
+
+    try: 
+        tone_duration = float(duration_entry.get())
+        base_freq = float(base_freq_entry.get())
+        freq_step = float(freq_step_entry.get())
+    except: 
+        decode_output_label.config(text= "Please fill out all fields with an the proper value.")
+        return
+
+    try:
+        audio_file_path = filedialog.askopenfilename()
+    except:
+        decode_output_label.config(text="No file chosen")
         return 
     
-    tone_duration = float(duration_entry.get())
-    base_freq = float(base_freq_entry.get())
-    freq_step = float(freq_step_entry.get())
+    decoded_audio = encoder.decodeAudio(
+        tone_duration=tone_duration,
+        base_freq=base_freq, 
+        freq_step=freq_step, 
+        audio_file_path=audio_file_path
+    )
 
-    result = encoder.decodeAudio(tone_duration, base_freq, freq_step, audio_path)
-    output_label.config(text=f"Decoded Text: {result}")
+    decode_output_label.config(text=f"Decoded Text: {decoded_audio}")
     
-
+#Decode button
 tk.Button(root, text="Decode Audio", command=decode_audio).pack(pady=10)
+decode_output_label.pack(pady=10)
 
+#Main loop
 root.mainloop()
 
 

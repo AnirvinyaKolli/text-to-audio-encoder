@@ -1,0 +1,3 @@
+Tone Duration: 1.0
+Base Frequency: 1.0
+Frequency Step: 1.0
