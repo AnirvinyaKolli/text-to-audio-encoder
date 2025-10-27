@@ -1,3 +1,9 @@
+'''
+Sai Anirvinya Kolli 
+Chapter 2: Input & Output
+Text to Audio encoder
+10/31/25
+'''
 import ascii_audio_encoder 
 import tkinter as tk 
 from tkinter import filedialog
