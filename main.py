@@ -4,11 +4,11 @@ Chapter 2: Input & Output
 Text to Audio encoder
 10/31/25
 '''
-import ascii_audio_encoder 
+import ascii_audio_encoder as encoder
 import tkinter as tk 
 from tkinter import filedialog
 
-encoder = ascii_audio_encoder.AudioEncoder()
+
 
 #setup of tkinter window
 root = tk.Tk()
@@ -80,7 +80,6 @@ tk.Button(root, text="Encode Text to Audio", command=encode_audio).pack(pady=10)
 encode_output_label.pack(pady=10)
 
 #Decode
-
 #Get tone duration
 tk.Label(root, text="Tone Duration (seconds):").pack(pady=5)
 duration_entry = tk.Entry(root, width=30)
@@ -123,7 +122,7 @@ def decode_audio():
         freq_step=freq_step, 
         audio_file_path=audio_file_path
     )
-
+    print(decoded_audio)
     decode_output_label.config(text=f"Decoded Text: {decoded_audio}")
     
 #Decode button
